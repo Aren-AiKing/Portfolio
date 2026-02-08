@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Model Explainability Demos - ML/DS Portfolio</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="./assets/css/styles.css">
+    
+    <!-- Plotly for interactive visualizations -->
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+    
+    <style>
+        .demo-container {
+            padding-top: 100px;
+            min-height: 100vh;
+        }
+        
+        .demo-section {
+            margin-bottom: var(--spacing-2xl);
+            padding: var(--spacing-xl);
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(10px);
+        }
+        
+        .demo-title {
+            font-size: var(--font-size-xl);
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .demo-description {
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-lg);
+            line-height: 1.6;
+        }
+        
+        .chart-container {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            margin: var(--spacing-md) 0;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+            margin: var(--spacing-md) 0;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+        
+        .control-group label {
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+        }
+        
+        .control-group select,
+        .control-group input {
+            padding: var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--bg-tertiary);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-family: var(--font-primary);
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+        }
+        
+        .metric-card {
+            background: var(--bg-tertiary);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+        
+        .metric-label {
+            font-size: var(--font-size-sm);
+            color: var(--text-tertiary);
+            margin-top: var(--spacing-xs);
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="index.html"><span class="logo-text">ML<span class="accent">DS</span></span></a>
+            </div>
+            <div class="nav-controls">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="demo-container">
+        <div class="container">
+            <h1 class="section-title">
+                <span class="title-number">Viz</span>
+                Interactive Model Explainability
+            </h1>
+            
+            <p class="text-secondary" style="max-width: 800px; margin: 0 auto var(--spacing-2xl);">
+                Explore interactive visualizations demonstrating key machine learning concepts: 
+                SHAP values for feature importance, confusion matrices for classification metrics, 
+                and ROC/PR curves for model performance analysis.
+            </p>
+
+            <!-- SHAP Feature Importance -->
+            <div class="demo-section">
+                <h2 class="demo-title">
+                    <i class="fas fa-chart-bar" style="color: var(--color-primary);"></i>
+                    SHAP Feature Importance
+                </h2>
+                <p class="demo-description">
+                    SHAP (SHapley Additive exPlanations) values show how much each feature contributes 
+                    to the model's prediction. Positive values push the prediction higher, negative 
+                    values push it lower. Interact with the chart to explore different features.
+                </p>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label for="shapDataset">Dataset</label>
+                        <select id="shapDataset">
+                            <option value="credit">Credit Risk Model</option>
+                            <option value="churn">Customer Churn Model</option>
+                            <option value="house">House Price Model</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div id="shapChart"></div>
+                </div>
+                
+                <div class="metric-grid">
+                    <div class="metric-card">
+                        <div class="metric-value" id="shapTopFeature">-</div>
+                        <div class="metric-label">Top Feature</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="shapMeanImpact">-</div>
+                        <div class="metric-label">Mean Impact</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="shapNumFeatures">-</div>
+                        <div class="metric-label">Features Analyzed</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Confusion Matrix -->
+            <div class="demo-section">
+                <h2 class="demo-title">
+                    <i class="fas fa-th" style="color: var(--color-secondary);"></i>
+                    Interactive Confusion Matrix
+                </h2>
+                <p class="demo-description">
+                    A confusion matrix shows the performance of a classification model by comparing 
+                    predicted vs actual labels. Hover over cells to see detailed counts and percentages.
+                </p>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label for="confusionModel">Model Type</label>
+                        <select id="confusionModel">
+                            <option value="balanced">Balanced Model</option>
+                            <option value="precision">High Precision Model</option>
+                            <option value="recall">High Recall Model</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="confusionClasses">Number of Classes</label>
+                        <select id="confusionClasses">
+                            <option value="2">Binary (2 classes)</option>
+                            <option value="3">Multi-class (3 classes)</option>
+                            <option value="5">Multi-class (5 classes)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div id="confusionMatrix"></div>
+                </div>
+                
+                <div class="metric-grid">
+                    <div class="metric-card">
+                        <div class="metric-value" id="confusionAccuracy">-</div>
+                        <div class="metric-label">Accuracy</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="confusionPrecision">-</div>
+                        <div class="metric-label">Precision</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="confusionRecall">-</div>
+                        <div class="metric-label">Recall</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="confusionF1">-</div>
+                        <div class="metric-label">F1 Score</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROC/PR Curves -->
+            <div class="demo-section">
+                <h2 class="demo-title">
+                    <i class="fas fa-chart-line" style="color: var(--color-accent);"></i>
+                    ROC & Precision-Recall Curves
+                </h2>
+                <p class="demo-description">
+                    ROC (Receiver Operating Characteristic) and PR (Precision-Recall) curves evaluate 
+                    classifier performance across different threshold values. These curves are essential 
+                    for understanding trade-offs between true positive rate, false positive rate, precision, and recall.
+                </p>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label for="rocDataset">Scenario</label>
+                        <select id="rocDataset">
+                            <option value="balanced">Balanced Dataset</option>
+                            <option value="imbalanced">Imbalanced Dataset (1:10)</option>
+                            <option value="severe">Severely Imbalanced (1:100)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div id="rocChart"></div>
+                </div>
+                
+                <div class="chart-container">
+                    <div id="prChart"></div>
+                </div>
+                
+                <div class="metric-grid">
+                    <div class="metric-card">
+                        <div class="metric-value" id="rocAUC">-</div>
+                        <div class="metric-label">ROC AUC</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="prAUC">-</div>
+                        <div class="metric-label">PR AUC</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="optimalThreshold">-</div>
+                        <div class="metric-label">Optimal Threshold</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Correlation -->
+            <div class="demo-section">
+                <h2 class="demo-title">
+                    <i class="fas fa-project-diagram" style="color: var(--color-success);"></i>
+                    Feature Correlation Heatmap
+                </h2>
+                <p class="demo-description">
+                    Correlation matrices reveal relationships between features, helping identify 
+                    multicollinearity and guide feature engineering decisions.
+                </p>
+                
+                <div class="chart-container">
+                    <div id="correlationMatrix"></div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: var(--spacing-2xl);">
+                <a href="index.html" class="btn btn-primary">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Portfolio</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 Your Name. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="./js/main.js"></script>
+    <script src="./js/visualizations.js"></script>
+</body>
+</html>

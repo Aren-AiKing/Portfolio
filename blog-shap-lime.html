@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A comprehensive guide to model explainability using SHAP and LIME">
+    <title>Demystifying Model Explainability: SHAP vs LIME - ML/DS Portfolio</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="./assets/css/styles.css">
+    <link rel="stylesheet" href="./assets/css/blog.css">
+</head>
+<body data-theme="dark">
+    
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="index.html"><span class="logo-text">ML<span class="accent">DS</span></span></a>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="index.html#home" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="index.html#projects" class="nav-link">Projects</a></li>
+                <li class="nav-item"><a href="index.html#blog" class="nav-link active">Blog</a></li>
+                <li class="nav-item"><a href="index.html#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="nav-controls">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Blog Article -->
+    <article class="blog-article">
+        <div class="blog-header">
+            <div class="container" style="max-width: 800px;">
+                <div class="blog-meta">
+                    <span class="blog-date">
+                        <i class="far fa-calendar"></i>
+                        January 15, 2026
+                    </span>
+                    <span class="blog-read-time">
+                        <i class="far fa-clock"></i>
+                        8 min read
+                    </span>
+                </div>
+                
+                <h1 class="blog-title-main">Demystifying Model Explainability: SHAP vs LIME</h1>
+                
+                <div class="blog-tags">
+                    <span class="tag">Explainability</span>
+                    <span class="tag">SHAP</span>
+                    <span class="tag">LIME</span>
+                    <span class="tag">Tutorial</span>
+                </div>
+                
+                <div class="author-info">
+                    <img src="./images/avatar.jpg" alt="Author" class="author-avatar">
+                    <div>
+                        <p class="author-name">Your Name</p>
+                        <p class="author-title">ML Engineer & Data Scientist</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="blog-content">
+            <div class="container" style="max-width: 800px;">
+                
+                <div class="reading-progress-container">
+                    <div class="reading-progress-bar" id="readingProgress"></div>
+                </div>
+
+                <p class="lead">
+                    As machine learning models become increasingly complex and are deployed in critical 
+                    decision-making systems, the ability to explain and interpret their predictions has 
+                    become paramount. In this article, we'll dive deep into two powerful explainability 
+                    techniques: SHAP (SHapley Additive exPlanations) and LIME (Local Interpretable 
+                    Model-agnostic Explanations).
+                </p>
+
+                <h2>Why Model Explainability Matters</h2>
+                <p>
+                    In regulated industries like healthcare, finance, and legal services, being able to 
+                    explain why a model made a particular prediction isn't just nice to have—it's often 
+                    legally required. Beyond compliance, explainability helps us:
+                </p>
+                <ul>
+                    <li><strong>Build trust</strong> with stakeholders and end-users</li>
+                    <li><strong>Debug models</strong> by identifying unexpected patterns</li>
+                    <li><strong>Detect bias</strong> in model predictions</li>
+                    <li><strong>Improve models</strong> through better understanding of feature importance</li>
+                </ul>
+
+                <div class="callout callout-info">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <h3>Key Insight</h3>
+                        <p>
+                            The best explainability method depends on your use case. SHAP excels at global 
+                            explanations and is theoretically grounded, while LIME is faster and works well 
+                            for local, instance-specific explanations.
+                        </p>
+                    </div>
+                </div>
+
+                <h2>SHAP: A Game Theory Approach</h2>
+                <p>
+                    SHAP values are based on cooperative game theory and provide a unified measure of 
+                    feature importance. The core idea is to calculate how much each feature contributes 
+                    to pushing the model's prediction away from the base value (the average prediction).
+                </p>
+
+                <h3>How SHAP Works</h3>
+                <p>
+                    For each prediction, SHAP computes the marginal contribution of each feature by 
+                    considering all possible coalitions of features. This ensures:
+                </p>
+                <ol>
+                    <li><strong>Local accuracy:</strong> Explanations sum up to the actual prediction</li>
+                    <li><strong>Consistency:</strong> If a model changes so feature A has more impact, its SHAP value increases</li>
+                    <li><strong>Missingness:</strong> Features not included have zero impact</li>
+                </ol>
+
+                <h3>Code Example: Using SHAP</h3>
+                <pre><code class="language-python">import shap
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import load_iris
+
+# Load data
+X, y = load_iris(return_X_y=True, as_frame=True)
+
+# Train model
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X, y)
+
+# Create SHAP explainer
+explainer = shap.TreeExplainer(model)
+shap_values = explainer.shap_values(X)
+
+# Visualize feature importance
+shap.summary_plot(shap_values, X, plot_type="bar")
+
+# Explain a single prediction
+shap.waterfall_plot(shap.Explanation(
+    values=shap_values[0][0],
+    base_values=explainer.expected_value[0],
+    data=X.iloc[0],
+    feature_names=X.columns.tolist()
+))
+</code></pre>
+
+                <div class="image-container">
+                    <img src="./images/shap-example.jpg" alt="SHAP visualization example" style="width: 100%; border-radius: var(--radius-md);">
+                    <p class="image-caption">SHAP summary plot showing feature importance across all predictions</p>
+                </div>
+
+                <h2>LIME: Local Explanations Through Perturbations</h2>
+                <p>
+                    LIME takes a different approach by creating a local, interpretable approximation 
+                    of your black-box model around a specific prediction. It perturbs the input data 
+                    and observes how predictions change, then fits a simple interpretable model 
+                    (like linear regression) to these perturbations.
+                </p>
+
+                <h3>When to Use LIME</h3>
+                <p>LIME shines when you need:</p>
+                <ul>
+                    <li>Quick explanations for individual predictions</li>
+                    <li>Model-agnostic explanations (works with any black-box model)</li>
+                    <li>Explanations for complex data types (text, images)</li>
+                </ul>
+
+                <h3>Code Example: Using LIME</h3>
+                <pre><code class="language-python">from lime import lime_tabular
+import numpy as np
+
+# Create LIME explainer
+explainer = lime_tabular.LimeTabularExplainer(
+    training_data=X.values,
+    feature_names=X.columns.tolist(),
+    class_names=['setosa', 'versicolor', 'virginica'],
+    mode='classification'
+)
+
+# Explain a single instance
+instance = X.iloc[0].values
+explanation = explainer.explain_instance(
+    data_row=instance,
+    predict_fn=model.predict_proba,
+    num_features=4
+)
+
+# Visualize
+explanation.show_in_notebook()
+
+# Get feature importance
+print(explanation.as_list())
+</code></pre>
+
+                <h2>SHAP vs LIME: The Comparison</h2>
+                
+                <div class="comparison-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Aspect</th>
+                                <th>SHAP</th>
+                                <th>LIME</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Theoretical Foundation</strong></td>
+                                <td>Game theory (Shapley values)</td>
+                                <td>Local linear approximation</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Consistency</strong></td>
+                                <td>Always consistent</td>
+                                <td>May vary between runs</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Speed</strong></td>
+                                <td>Slower (especially KernelSHAP)</td>
+                                <td>Faster</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Global vs Local</strong></td>
+                                <td>Both (summary plots for global)</td>
+                                <td>Primarily local</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Model Support</strong></td>
+                                <td>Model-specific explainers (faster)</td>
+                                <td>Fully model-agnostic</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Interpretability</strong></td>
+                                <td>Additive feature attribution</td>
+                                <td>Local linear model</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="callout callout-tip">
+                    <i class="fas fa-lightbulb"></i>
+                    <div>
+                        <h3>Pro Tip</h3>
+                        <p>
+                            Use SHAP's TreeExplainer for tree-based models (Random Forest, XGBoost, 
+                            LightGBM) as it's extremely fast and exact. For deep learning models, 
+                            DeepExplainer provides efficient gradient-based explanations.
+                        </p>
+                    </div>
+                </div>
+
+                <h2>Best Practices for Model Explainability</h2>
+                <ol>
+                    <li>
+                        <strong>Start with global explanations:</strong> Understand overall model behavior 
+                        with SHAP summary plots before diving into individual predictions.
+                    </li>
+                    <li>
+                        <strong>Validate explanations:</strong> Check if explanations align with domain 
+                        knowledge. Unexpected patterns may indicate data leakage or bias.
+                    </li>
+                    <li>
+                        <strong>Compare multiple methods:</strong> Use both SHAP and LIME for critical 
+                        predictions to ensure robust explanations.
+                    </li>
+                    <li>
+                        <strong>Communicate clearly:</strong> Tailor explanations to your audience—technical 
+                        teams need different details than business stakeholders.
+                    </li>
+                    <li>
+                        <strong>Monitor in production:</strong> Track how feature importances change over 
+                        time to detect model drift.
+                    </li>
+                </ol>
+
+                <h2>Real-World Example: Credit Risk Assessment</h2>
+                <p>
+                    Let's consider a credit scoring model that predicts loan default risk. Here's how 
+                    SHAP and LIME would be used:
+                </p>
+
+                <h3>SHAP Analysis</h3>
+                <pre><code class="language-python"># Global feature importance
+shap.summary_plot(shap_values, X_test)
+# Reveals: Income, debt-to-income ratio, and credit history 
+# are top predictors
+
+# Individual explanation
+shap.force_plot(
+    explainer.expected_value,
+    shap_values[customer_id],
+    X_test.iloc[customer_id]
+)
+# Shows: High debt-to-income ratio pushed prediction toward 
+# "high risk"
+</code></pre>
+
+                <h3>LIME Analysis</h3>
+                <pre><code class="language-python"># Explain why customer #123 was denied
+exp = explainer.explain_instance(
+    X_test.iloc[123],
+    model.predict_proba
+)
+
+# Output: 
+# - Debt-to-income ratio > 0.45 (increases risk by 0.28)
+# - Recent late payment (increases risk by 0.15)
+# - Income < $45k (increases risk by 0.09)
+</code></pre>
+
+                <h2>Conclusion</h2>
+                <p>
+                    Both SHAP and LIME are powerful tools for model explainability, each with its own 
+                    strengths. SHAP's solid theoretical foundation and consistency make it ideal for 
+                    comprehensive model analysis, while LIME's speed and flexibility excel in quick, 
+                    instance-level explanations.
+                </p>
+                <p>
+                    In practice, the best approach often combines both methods: use SHAP for thorough 
+                    analysis during model development and validation, and LIME for rapid explanations 
+                    in production systems where speed is critical.
+                </p>
+
+                <div class="callout callout-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <h3>Important Reminder</h3>
+                        <p>
+                            Explanations are approximations. Always validate them against domain knowledge 
+                            and use them as tools for understanding, not as absolute truth. The quality of 
+                            explanations depends heavily on the quality of your data and features.
+                        </p>
+                    </div>
+                </div>
+
+                <h2>Further Reading</h2>
+                <ul>
+                    <li><a href="https://shap.readthedocs.io/" target="_blank">SHAP Documentation</a></li>
+                    <li><a href="https://github.com/marcotcr/lime" target="_blank">LIME GitHub Repository</a></li>
+                    <li><a href="https://christophm.github.io/interpretable-ml-book/" target="_blank">Interpretable Machine Learning Book</a></li>
+                </ul>
+
+                <div class="article-footer">
+                    <div class="share-article">
+                        <h3>Share this article</h3>
+                        <div class="share-buttons">
+                            <a href="#" class="share-btn" aria-label="Share on Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="share-btn" aria-label="Share on LinkedIn">
+                                <i class="fab fa-linkedin"></i>
+                            </a>
+                            <a href="#" class="share-btn" aria-label="Copy link">
+                                <i class="fas fa-link"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="article-navigation">
+                        <a href="#" class="nav-prev">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Previous Article</span>
+                        </a>
+                        <a href="index.html#blog" class="nav-blog">
+                            <i class="fas fa-th"></i>
+                            <span>All Articles</span>
+                        </a>
+                        <a href="#" class="nav-next">
+                            <span>Next Article</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 Your Name. All rights reserved.</p>
+                <p><a href="privacy-policy.html">Privacy Policy</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="./js/main.js"></script>
+    <script src="./js/blog.js"></script>
+</body>
+</html>
