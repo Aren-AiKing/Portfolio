@@ -6,8 +6,8 @@ A modern, responsive portfolio showcasing my AI/ML projects, skills, and experie
 
 **Yes, this website is publicly accessible!**
 
-Once deployed to GitHub Pages, anyone can visit the live website at:
-`https://[your-github-username].github.io/Portfolio/`
+Visit the live website at:
+**https://Aren-AiKing.github.io/Portfolio/**
 
 ## 🚀 Features
 
